@@ -69,3 +69,16 @@ request-based availability нь time-based availability-аас
 Reliability SLO-г зөрчсөн. Сервер унтарсан үед /pay хүсэлтүүд
 мөн амжилтгүй болсон учраас нэг серверийн эвдрэл availability
 болон reliability SLO-д хоёуланд нь нөлөөлсөн.
+
+### FAIL тестийн үр дүн
+
+`/report` endpoint-ийн threshold-ийг зориуд `p(95) < 100 ms`
+болгож туршсан.
+
+- `/cart/add`: p95 = 943.91 µs — PASS
+- `/report`: p95 = 391.11 ms — FAIL
+- `/pay` error rate = 4.09% — PASS
+- checks = 98.63% — PASS
+
+`/report` endpoint нь 200–400 ms сааталтай учраас`p(95) < 100 ms` босгыг хангаж чадаагүй. k6 нь
+`http_req_duration{name:report}` threshold зөрчигдсөнийг илрүүлсэн.
