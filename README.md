@@ -30,3 +30,42 @@ p95 < 450 ms босго сонгосон. Туршилтаар p95 = 388.93 ms
 /pay endpoint нь ойролцоогоор 5% санамсаргүй алдаа үүсгэхээр
 хийгдсэн тул error rate < 8% босго сонгосон. Туршилтаар
 error rate = 3.54% гарсан бөгөөд Reliability SLO-г хангасан.
+
+## Chaos test
+
+Chaos туршилтыг 20 VU, 2 минутын хугацаатай ажиллуулсан.
+Туршилтын үед серверийг зориудаар 10 секунд зогсоож дараа нь
+дахин асаасан.
+
+| Үзүүлэлт                | SLO          | Бодит үр дүн | Төлөв |
+| ----------------------- | ------------ | ------------ | ----- |
+| `/cart/add` latency     | p95 < 2 ms   | 1.04 ms      | PASS  |
+| `/report` latency       | p95 < 450 ms | 389.77 ms    | PASS  |
+| Availability (`checks`) | > 90%        | 78.23%       | FAIL  |
+| `/pay` error rate       | < 8%         | 24.48%       | FAIL  |
+
+Нийт 5820 check-ээс 4553 нь амжилттай, 1267 нь амжилтгүй
+болсон. Иймээс request-based availability:
+
+Availability = 4553 / 5820 × 100 = 78.23%
+
+Availability SLO нь 90%-иас дээш байх ёстой байсан тул chaos
+туршилтын үед availability threshold FAIL болсон.
+
+2 минут цонхонд 90% availability SLO-ийн
+time-based error budget:
+
+120 × (1 - 0.90) = 12 секунд.
+
+Серверийг ойролцоогоор 10 секунд зогсоосон нь time-based
+12 секундын error budget-аас бага боловч request-based
+availability 78.23% болсон. Учир нь сервер унтарсан үед
+хүсэлтүүд connection refused алдаатайгаар маш хурдан буцдаг.
+Иймээс богино хугацаанд олон failed request үүсэж,
+request-based availability нь time-based availability-аас
+доогуур гарсан.
+
+Мөн /pay endpoint-ийн error rate 24.48% болж, 8%-ийн
+Reliability SLO-г зөрчсөн. Сервер унтарсан үед /pay хүсэлтүүд
+мөн амжилтгүй болсон учраас нэг серверийн эвдрэл availability
+болон reliability SLO-д хоёуланд нь нөлөөлсөн.
